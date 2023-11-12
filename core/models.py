@@ -65,13 +65,21 @@ class Product_in_Order(models.Model):
     quantity = models.IntegerField()
     price = models.IntegerField()
 
+    def __str__(self):
+        return f'{self.order.id} {self.id} !{self.quantity}!'
+
+
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     adress = models.CharField(max_length=255)
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
     products = models.ManyToManyField(Product, through=Product_in_Order)
     date = models.DateTimeField(blank=True, null=True, auto_now=True)
+    price = models.IntegerField()
+    quantity = models.IntegerField()
 
+    def __str__(self):
+        return str(self.id)
 
 
 

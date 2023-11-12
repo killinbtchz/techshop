@@ -269,15 +269,12 @@ def orders(request):
 
 
 def create_order(request):
-    order = Order.objects.create()
-    order.user = request.user
-    order.adress = 'asdfasdf Адрес '
+    status = Status.objects.get(status='Новый')
     cart = Cart(request)
+    order = Order.objects.create(status=status, user=request.user, adress='asdfasdf Адрес ', price=cart.get_total_price(), quantity=len(cart))
     for item in cart:
-        order.products.add()
-        print(item['product'], item['quantity'], item['price'])
-
-
+        Product_in_Order.objects.create (order=order,product=item['product'],quantity=item['quantity'], price=item['price']).save()
+    cart.clear()
     return HttpResponse('ok')
 
 
