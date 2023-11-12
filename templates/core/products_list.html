@@ -1,0 +1,18 @@
+<div>
+   Найдено: {{ products.count }} <br>
+</div>
+
+{% for product in products %}
+    <div class="card mb-3">
+        <div class="card-header">
+            {{ product.category }}
+        </div>
+        <div class="card-body">
+            <a href="{{ product.get_absolute_url }}"><h5 class="card-title">{{ product.name }}</h5></a>
+            <p class="card-text">{{ product.description }}</p>
+            <button type="button" class="btn btn-primary" onclick="cart_add({{ product.id }})">Купить</button>
+        </div>
+    </div>
+{% endfor %}
+
+

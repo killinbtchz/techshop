@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>Корзина</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in cart %}
+        <tr id="product_row{{ item.product.id }}">
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.price }} руб.</td>
+        <td>
+            <div class="quantity-control">
+                <button type="button" class="btn btn-secondary" onclick="cart_update({{ item.product.id }}, -1)">-</button>
+                <span class="quantity" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
+                <button type="button" class="btn btn-secondary" onclick="cart_update({{ item.product.id }}, 1)">+</button>
+            </div>
+        </td>
+        <td class="total-price" data-product-id="{{ item.product.id }}">{{ item.totalprice }} руб.</td>
+        <td>
+            <button type="button" class="btn btn-danger" data-product-id="{{ item.product.id }}" onclick="cart_remove(this)">Remove</button>
+        </td>
+    </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="cart-actions">
+    <a class="btn btn-primary" href="{% url 'checkout' %}">Proceed to Checkout</a>
+    <a class="btn btn-secondary" href="{% url 'index' %}">Continue Shopping</a>
+      <button type="button" class="btn btn-danger" id="clear-cart">Clear Cart</button>
+  </div>
+
+  <div class="total-price-section">
+    Общая цена: <span id="total-price">{{ cart.get_total_price }}</span> руб.
+  </div>
+
+  <div class="total-quantity-section">
+    Общее количество: <span id="total-quantity">{{ cart.get_total_quantity }}</span>
+  </div>
+</div>
+{% endblock %}

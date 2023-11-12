@@ -1,0 +1,11 @@
+<div class="product">
+    <div class="product_header">{{ forloop.counter }}  {{ product.name }}</div>
+    <div class="product_body">
+        <p>{{ product.price }}</p>
+        <p>{{ product.category }}</p>
+        <p>{{ product.description }}</p>
+        <p>{{ product.tag.all }}</p>
+    </div>
+</div>
+<hr>
+

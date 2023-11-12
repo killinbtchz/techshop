@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+{% block title %}Заказы{% endblock %}
+{% block content %}
+
+<div class="container">
+    <h5>Оформление заказа</h5>
+    <form method="post" action="" id="checkout_form">
+        <p><input name="name" type="text" placeholder="Введите ваше ФИО"></p>
+        <p><input name="adress" type="text" placeholder="Введите ваш адрес"></p>
+    </form>
+  <h2>Заказ</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Product</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in cart %}
+        <tr id="product_row{{ item.product.id }}">
+        <td>{{ item.product.name }}</td>
+        </tr>
+      {% endfor %}
+          </tbody>
+  </table>
+    <div class="total-price-section">
+    Общая цена: <span id="total-price">{{ cart.get_total_price }}</span> руб.
+  </div>
+
+  <div class="total-quantity-section">
+    Общее количество: <span id="total-quantity">{{ cart.get_total_quantity }}</span>
+  </div>
+   <button class="btn btn-primary" onclick="create_order()">Оформить заказ</button>
+</div>
+
+{% endblock %}

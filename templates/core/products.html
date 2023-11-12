@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+{% block title %}all products{% endblock %}
+{% block js_extra %}
+    <script>
+        var categories;
+        var brands;
+
+        function select_brand(){
+            brands = '';
+            let data = [];
+            document.getElementsByName('brand').forEach(function(item){
+                if (item.checked) {
+                    data[data.length] = item.value;
+                }
+            })
+            if (data.length > 0) {
+                brands = 'brands=' +  data.join(",");
+                get_products();
+            }
+        }
+
+        function select_category(){
+            categories = '';
+            let data = [];
+            document.getElementsByName('category').forEach(function(item){
+                if (item.checked) {
+                    data[data.length] = item.value;
+                }
+            })
+            if (data.length > 0) {
+                categories = 'categories=' +  data.join(",");
+                get_products();
+            }
+        }
+
+        function get_products(){
+            var csrftoken = getCookie('csrftoken');
+            let msg = [];
+            if (brands){
+                msg[msg.length] = brands;
+            }
+            if (categories){
+                msg[msg.length] = categories;
+            }
+            msg = msg.join('&');
+            document.getElementById('products').innerHTML = '';
+            $.ajax({
+                beforeSend: function(xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+              type: 'POST',
+              url: '/products',
+              data: msg,
+              success: function(data) {
+
+                  document.getElementById('products').innerHTML = data;
+
+              },
+            });
+        }
+    </script>
+
+{% endblock %}
+
+{% block content %}
+    <style>
+        .scrollable-menu {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-title">Категории:</p>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="categoryDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Выберите Категорию:
+                            </button>
+                            <div class="dropdown-menu scrollable-menu" aria-labelledby="categoryDropdown">
+                                {% for cat in categories %}
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="category" onchange="select_category()" value="{{ cat.id }}">
+                                        <label class="form-check-label">{{ cat }}</label><br>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <p class="card-title">Бренды:</p>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="brandDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Выберите Бренд:
+                            </button>
+                            <div class="dropdown-menu scrollable-menu" aria-labelledby="brandDropdown">
+                                {% for brand in brands %}
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="brand" onchange="select_brand()" value="{{ brand.id }}">
+                                        <label class="form-check-label">{{ brand }}</label><br>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div>
+                    {{ filter }}<br>
+                    {{ filter_value }}<br>
+                </div>
+                <div id="products">
+                    {% include 'core/products_list.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

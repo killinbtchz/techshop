@@ -1,0 +1,13 @@
+{% extends 'core/base.html' %}
+{% block title %}categories{% endblock %}
+
+{% block js_extra %}
+    <script>
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% for brand in brands %}
+        {% include 'core/one_brand.html' %}
+    {% endfor %}
+{% endblock %}
