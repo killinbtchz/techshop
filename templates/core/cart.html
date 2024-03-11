@@ -23,13 +23,13 @@
         <td>
             <div class="quantity-control">
                 <button type="button" class="btn btn-secondary" onclick="cart_update({{ item.product.id }}, -1)">-</button>
-                <span class="quantity" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
+                <span class="quantity" id="quantity{{ item.product.id }}" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
                 <button type="button" class="btn btn-secondary" onclick="cart_update({{ item.product.id }}, 1)">+</button>
             </div>
         </td>
         <td class="total-price" data-product-id="{{ item.product.id }}">{{ item.totalprice }} руб.</td>
         <td>
-            <button type="button" class="btn btn-danger" data-product-id="{{ item.product.id }}" onclick="cart_remove(this)">Remove</button>
+            <button type="button" class="btn btn-danger" data-product-id="{{ item.product.id }}" onclick="cart_remove({{ item.product.id }})">Remove</button>
         </td>
     </tr>
       {% endfor %}

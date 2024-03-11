@@ -1,7 +1,6 @@
-<div>
-   Найдено: {{ products.count }} <br>
-</div>
-
+{% load static %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.0/anime.min.js"></script>
+<link rel="stylesheet" href="{% static 'core/main.css' %}" />
 {% for product in products %}
     <div class="card mb-3">
         <div class="card-header">
@@ -10,7 +9,27 @@
         <div class="card-body">
             <a href="{{ product.get_absolute_url }}"><h5 class="card-title">{{ product.name }}</h5></a>
             <p class="card-text">{{ product.description }}</p>
-            <button type="button" class="btn btn-primary" onclick="cart_add({{ product.id }})">Купить</button>
+            {% if 0 %}
+                <span class="quantity-controls" id="quantity-controls{{ product.id }}" >
+                    <button type="button" class="btn btn-danger" onclick="product_quantity_in_cart_change({{ product.id }}, -1)">-</button>
+                    <span class="quantity" id="quantity{{ product.id }}">{{ product.quantity_in_cart }}</span>
+                    <button type="button" class="btn btn-success" onclick="product_quantity_in_cart_change({{ product.id }}, 1)">+</button>
+                </span>
+                <button type="button" class="btn btn-primary hidden" id="buyButton{{ product.id }}" onclick="handleBuyClick({{ product.id }})">Добавить в корзину</button>
+                <a class="btn btn-info" href="/cart" id="cartLink{{ product.id }}">Корзина</a>
+                <img src="{% url 'get_resized_cart_icon' %}" alt="{{ product.name }}" class="product-icon" id="productIcon{{ product.id }}">
+            {% else %}
+                <span class="quantity-controls hidden" id="quantity-controls{{ product.id }}" >
+                    <button type="button" class="btn btn-danger" onclick="product_quantity_in_cart_change({{ product.id }}, -1)">-</button>
+                    <span class="quantity" id="quantity{{ product.id }}">0</span>
+                    <button type="button" class="btn btn-success" onclick="product_quantity_in_cart_change({{ product.id }}, 1)">+</button>
+                </span>
+                <button type="button" class="btn btn-primary" id="buyButton{{ product.id }}" onclick="handleBuyClick({{ product.id }})">Добавить в корзину</button>
+                <a class="btn btn-info cart-link hidden" href="/cart" id="cartLink{{ product.id }}">Корзина</a>
+                <span id="anim{{ product.id }}">
+                    <img src="{% url 'get_resized_cart_icon1' %}" alt="Product Image" class="animated-product-image">
+                </span>
+            {% endif %}
         </div>
     </div>
 {% endfor %}

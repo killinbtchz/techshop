@@ -7,6 +7,9 @@ from django.views.decorators.http import require_POST
 from .forms import CartAddProductForm
 from django.http import JsonResponse
 from PIL import Image
+from .serializers import ProductSerializer
+from rest_framework import generics
+
 
 
 
@@ -189,6 +192,17 @@ class Cart(object):
             del self.cart[product_id]
             self.save()
 
+    def get_quantity_product_in_cart(self, product_id):
+        product_id = str(product_id)
+        if product_id in self.cart:
+            return self.cart[product_id]['quantity']
+        else:
+            return 0
+
+    def test(self):
+        return 'Hello!'
+
+
 
 @require_POST
 def cart_add(request):
@@ -236,27 +250,34 @@ def cart_update(request):
     current_quantity = cart.cart[str(product.id)]['quantity']
     new_quantity = max(current_quantity + quantity_change, 0)
     cart.add(product=product, quantity=new_quantity, update_quantity=True)
-    print(cart.cart)
-    context = {}
-    context['total_price'] = cart.get_total_price()
-    context['total_quantity'] = len(cart)
-    context['product_total_price'] = cart.cart[str(product.id)]['totalprice']
-    context['product_quantity'] = cart.cart[str(product.id)]['quantity']
 
+    context = {
+        'product_quantity': new_quantity,
+        'product_total_price': cart.cart[str(product.id)]['totalprice'],
+        'total_price': cart.get_total_price(),
+        'total_quantity': len(cart),
+    }
 
     return JsonResponse(context)
-
 
 
 def get_resized_cart_icon(request):
     image_path = 'static/pngwing.com (50).png'
     img = Image.open(image_path)
-    img = img.resize((30, 30), Image.ANTIALIAS)
+    img = img.resize((30, 30), Image.Resampling.LANCZOS)
 
     response = HttpResponse(content_type="image/png")
     img.save(response, "PNG")
     return response
 
+def get_resized_cart_icon1(request):
+    image_path = 'static/pngwing.com (54).png'
+    img = Image.open(image_path)
+    img = img.resize((20, 20), Image.Resampling.LANCZOS)
+
+    response = HttpResponse(content_type="image/png")
+    img.save(response, "PNG")
+    return response
 
 def orders(request):
     print('orders')
@@ -276,5 +297,43 @@ def create_order(request):
         Product_in_Order.objects.create (order=order,product=item['product'],quantity=item['quantity'], price=item['price']).save()
     cart.clear()
     return HttpResponse('ok')
+
+
+def arm_op(request):
+    context = {}
+    context['orders'] = Order.objects.all()
+    context['statuses'] = Status.objects.all()
+    cart = Cart(request)
+    context['cart'] = cart
+    print(context)
+    return render(request, 'core/arm_op.html', context)
+
+
+def update_order_status(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        new_status = request.POST.get('new_status')
+        order = Order.objects.get(id=order_id)
+        status = Status.objects.get(id=new_status)
+        order.status = status
+        order.save()
+
+        return HttpResponse(status.status)
+
+
+def delme(request):
+    return render(request, 'core/delme.html')
+
+
+def test(request):
+    return render(request, 'core/test.html')
+
+
+
+
+class ProductListCreate(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
 
 

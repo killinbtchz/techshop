@@ -1,0 +1,289 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart{% endblock %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+{% block document_ready_extra %}
+    show(data_all);
+{% endblock %}
+
+{% block js_extra %}
+    <script>
+        var statuses = new Map();
+        {% for status in statuses %}
+            statuses.set('{{ status.status }}', '{{ status.id }}');
+        {% endfor %}
+        var data_all = [];
+        let n = 1;
+        {% for order in orders %}
+            var row = [];
+            row.push("{{ order.id }}");
+            row.push("{{ order.date|date:'Y-m-d' }}");
+            row.push("{{ order.date|date:'H:i' }}");
+            row.push("{{ order.user }}");
+            row.push("{{ order.status }}");
+            row.push({{ order.price }});
+            row.push({{ order.quantity }});
+            var products = [];
+            {% for product_in_order in order.products.all %}
+                var product = [];
+                product.push("{{ product_in_order.product }}");
+                product.push("{{ product_in_order.price }}");
+                product.push("{{ product_in_order.quantity }}");
+                product.push("{{ product_in_order.date }}");
+                products.push(product);
+            {% endfor %}
+            row.push(products);
+            data_all.push(row);
+        {% endfor %}
+
+        function show_date_field() {
+            let filterInput = $('#datepicker');
+            filterInput.toggleClass('hidden');
+        }
+
+        $(function() {
+            var startDate;
+            var endDate;
+
+            $('#datepicker').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'yy-mm-dd',
+                onSelect: function(dateText, inst) {
+                    if (!startDate || endDate) {
+                        startDate = dateText;
+                        endDate = '';
+                    } else {
+                        endDate = dateText;
+                    }
+
+                    if (startDate && endDate) {
+                        filterByDateRange(startDate, endDate);
+                    }
+                },
+                beforeShowDay: function(date) {
+                    var highlight = startDate && endDate ?
+                        (date >= new Date(startDate) && date <= new Date(endDate)) :
+                        (date >= new Date(startDate) && date <= new Date(startDate));
+                    return [true, highlight ? 'date-range' : ''];
+                }
+            });
+        });
+
+        function filterByDateRange(startDate, endDate) {
+            console.log("Фильтрация заказов по дате...");
+            console.log("Выбранный отрезок:", startDate, endDate);
+
+            let filtered_data = data_all.filter(row => {
+                let orderDate = new Date(row[1]);
+                return orderDate >= new Date(startDate) && orderDate <= new Date(endDate);
+            });
+            console.log("Отфильтрованные данные:", filtered_data);
+            show(filtered_data);
+        }
+
+        function show(data) {
+            let tbody = document.getElementById('tbody');
+            tbody.innerHTML = '';
+            for (let i = 1; i <= data.length; i++) {
+                let row = data[i - 1];
+                let tr = document.createElement('tr');
+                tr.dataset.toggle = "collapse1";
+                tr.dataset.target = "#order_detail" + row[0];
+                tr.classList.add('accordion-toggle');
+                let td;
+
+                td = document.createElement('td');
+                td.innerHTML = i;
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = row[0];
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = row[1];
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = row[2];
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = row[3];
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = `<span id="status${row[4]}">${row[4]}</span>
+                                <select class="form-control hidden" onchange="updateOrderStatus(${row[0]}, this)" id="status_dropdown${row[0]}"></select>`;
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = row[5];
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = row[6];
+                tr.append(td);
+
+                td = document.createElement('td');
+                td.innerHTML = `<button class="btn btn-success" data-toggle="collapse" data-target="#order_detail${row[0]}">View</button>
+                                <button class="btn btn-warning" id="button${row[0]}" onclick="show_detail(${row[0]})">Edit</button>`;
+                tr.appendChild(td);
+
+                tbody.appendChild(tr);
+                let dich = document.createElement('div');
+                dich.classList.add('trow');
+                dich.id = row[0];
+                let div = document.createElement('div');
+                div.classList.add('hidden');
+                div.innerHTML = '<table class="table"> <thead> ' +
+                                 '<tr> ' +
+                                 '<th>Товар</th> ' +
+                                 ' <th>Цена</th> ' +
+                                 ' <th>Количество</th> ' +
+                                 ' <th>Действия</th> ' +
+                                 ' </tr> ' +
+                                 ' </thead> ' +
+                                 ' <tbody> </tbody> </table>';
+                dich.append(div);
+                tbody.append(dich);
+            }
+        }
+
+        function show_detail(id) {
+            let div = document.getElementById(id).firstChild;
+            div.classList.toggle('hidden');
+            if (div.classList.contains('hidden')) {
+                alert('Edit');
+            } else {
+                alert('Save');
+            }
+        }
+
+    </script>
+
+    <style>
+        .ui-datepicker-calendar .date-range a {
+            background: #5bc0de !important;
+            border-color: #46b8da !important;
+            color: #ffffff !important;
+        }
+
+        .ui-datepicker {
+        font-size: 15px;
+    }
+
+    .ui-datepicker-header {
+        background-color: #5bc0de;
+        color: #fff;
+    }
+
+    .ui-datepicker-calendar td {
+        border: 1px solid #ddd;
+        background-color: #fff;
+    }
+
+    .ui-datepicker-calendar .ui-state-default {
+        background-color: transparent;
+        color: #3875d7;
+    }
+
+    .ui-datepicker-calendar .ui-state-highlight {
+        background-color: #de4444;
+        color: #fff;
+    }
+
+    .ui-datepicker-calendar .ui-state-hover {
+        background-color: #46b8da;
+        color: #fff;
+    }
+
+     .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+    .table thead th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .table th, .table td {
+        padding: 2px;
+    }
+
+    .thead-dark {
+        background-color: #343a40;
+        color: #fff;
+    }
+
+    .textbox {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 5px;
+        z-index: 999;
+    }
+
+    .absolute {
+        position: absolute;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .voronka-icon {
+        cursor: pointer;
+    }
+
+    </style>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+    <div class="container mt-4">
+        <h2 class="">Список заказов</h2>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>№</th>
+                    <th>Код заказа</th>
+                    <th>Дата<br>
+                        <img src="{% static 'voronka.png' %}" class="voronka-icon" width="20px" onclick="show_date_field()">
+                        <div id="datepicker" class="textbox hidden absolute"></div>
+                    </th>
+                    <th>Время</th>
+                    <th>Пользователь<br>
+                        <img src="{% static 'voronka.png' %}" width="20px">
+                        <div class="textbox hidden absolute">
+                            <input type="text" class="filter-input" data-column-index="5">
+                            <button type="button" onclick="filterOrders()">Ok</button>
+                        </div>
+                    </th>
+                    <th>Статус<br>
+                        <select class="form-control filter-input" onchange="filterOrdersByStatus()" id="filterStatusInput" data-column-index="6">
+                            <option value="">Выберите статус</option>
+                            {% for status in statuses %}
+                                <option value="{{ status.status }}">{{ status.status }}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th>Сумма заказа</th>
+                    <th>Количество товара</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -5,10 +5,10 @@ from django.conf.urls.static import static
 from core import views
 
 urlpatterns = [
+    path('', views.index, name='index'),
     path('add/<int:product_id>/', views.cart_add, name='cart_add'),
     path('remove/', views.cart_remove, name='cart_remove'),
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
     path('products/', views.products, name='products'),
     path('products/product<int:id>/', views.product, name='product'),
     path('categories/', views.categories, name='categories'),
@@ -28,4 +28,11 @@ urlpatterns = [
     path('get_resized_cart_icon/', views.get_resized_cart_icon, name='get_resized_cart_icon'),
     path('orders/', views.orders, name='orders'),
     path('create_order/', views.create_order, name='create_order'),
+    path('arm_op/', views.arm_op, name='arm_op'),
+    path('get_resized_cart_icon1/', views.get_resized_cart_icon1, name='get_resized_cart_icon1'),
+    path('update_order_status/', views.update_order_status, name='update_order_status'),
+    path('delme', views.delme),
+    path('test', views.test),
+    path('api/product/', views.ProductListCreate.as_view() ),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

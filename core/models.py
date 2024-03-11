@@ -82,4 +82,9 @@ class Order(models.Model):
         return str(self.id)
 
 
+class Example(models.Model):
+    example = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.example
 
